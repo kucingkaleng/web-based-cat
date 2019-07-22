@@ -2,15 +2,16 @@
   <div>
     <section class="section">
       <div class="container">
-        <h1 class="title">{{ data.title }}</h1>
+        <h1 class="title">Score {{ exam.title }}</h1>
         <h2 class="subtitle">
-          Token : <strong>{{ data.token }}</strong>
+          Token : <strong>{{ exam.token }}</strong>
         </h2>
         <nav class="breadcrumb has-bullet-separator" aria-label="breadcrumbs">
           <ul>
             <li><router-link to="/home">Home</router-link></li>
             <li><router-link to="/ujian">Ujian</router-link></li>
-            <li class="is-active"><a href="#" aria-current="page">{{ data.title }}</a></li>
+            <li><router-link :to="`/ujian/${exam._id}`">{{ exam.title }}</router-link></li></li>
+            <li class="is-active"><a href="#">Scores</a></li>
           </ul>
         </nav>
 
@@ -19,27 +20,24 @@
             Tambah Rule
           </b-button>
 
-          <b-button v-if="data.alive != 'Pending'" type="is-success" icon-left="arrow-right" @click="$router.push(`/ujian/score/${data._id}`)">
-            Lihat Score Peserta
+          <b-button v-if="data.alive != 'Pending'" type="is-success" icon-left="file" @click="showModalAdd">
+            Export
           </b-button>
         </div>
         
-        <b-table :data="data.questions" bordered striped narrowed hoverable :loading="isLoading">
+        <b-table :data="data" bordered striped narrowed hoverable :loading="isLoading">
           <template slot-scope="props">
-            <b-table-column field="title" label="Type">
-              {{ (props.row.type) ? props.row.type : 'None' }}
+
+            <b-table-column field="user.nomor_induk" label="Nomor Induk" sortable>
+              {{ props.row.user.nomor_induk }}
             </b-table-column>
 
-            <b-table-column field="duration" label="Kompetensi">
-              {{ props.row.competency.competency }}
+            <b-table-column field="user.data.nama" label="Nama Peserta" sortable>
+              {{ props.row.user.data.nama }}
             </b-table-column>
 
-            <b-table-column field="date" label="Level">
-              {{ props.row.level.level }}
-            </b-table-column>
-
-            <b-table-column field="time" label="Jumlah Soal">
-              {{ props.row.number }}
+            <b-table-column label="Score">
+              {{ props.row.corrects.length * props.row.score_each }}
             </b-table-column>
 
             <b-table-column v-if="data.alive == 'Pending'" label="Action">
@@ -83,6 +81,7 @@ export default {
   data() {
     return {
       data: {},
+      exam: Object,
       form: {
         title: '',
         duration: '',
@@ -95,15 +94,25 @@ export default {
   },
 
   methods: {
+    async getScores() {
+      this.$store.state.isGlobalLoading = true
+      this.axios.get(`/score/in/${this.$route.params.id}`)
+      .then(result => {
+        this.data = result.data.results
+        this.$store.state.isGlobalLoading = false
+      })
+    },
+
     async getExams() {
       this.$store.state.isGlobalLoading = true
       this.axios.get(`/exam/${this.$route.params.id}`)
       .then(result => {
-        this.data = result.data.exam
-        this.data.date = this.moment(this.data.date).format('YYYY-MM-DD')
+        this.exam = result.data.exam
+        this.exam.date = this.moment(this.exam.date).format('YYYY-MM-DD')
         this.$store.state.isGlobalLoading = false
       })
     },
+
     showModalAdd() {
       this.isAddModalShow = true
     }
@@ -111,6 +120,7 @@ export default {
 
   mounted() {
     this.getExams()
+    this.getScores()
     this.$root.$on('refresh', () => {
       this.getExams()
     })

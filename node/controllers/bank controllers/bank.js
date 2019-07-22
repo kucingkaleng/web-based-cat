@@ -68,6 +68,18 @@ exports.updateBank = async (req, res) => {
   })
 }
 
+exports.addChoice = async (req, res) => {
+  let bank = req.detailBank
+  bank.choices.set(req.body)
+  bank.save((err, bank) => {
+    if (err) {
+      res.status(400).json({ error: err })
+    }
+
+    res.json({ message: 'Choice updated.'})
+  })
+}
+
 exports.updateChoice = async (req, res) => {
   let bank = req.detailBank
   let choice = bank.choices.id(req.params.choiceId)

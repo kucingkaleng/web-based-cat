@@ -15,5 +15,13 @@ export default [
       requiresAuth: true
     },
     component: () => import('@/views/dashboard/ujian/UjianById.vue')
+  },
+  {
+    path: '/ujian/score/:id',
+    meta: {
+      layout: "dashboard",
+      requiresAuth: true
+    },
+    component: () => import('@/views/dashboard/ujian/UjianScore.vue')
   }
 ]

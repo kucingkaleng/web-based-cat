@@ -27,12 +27,18 @@
               {{ props.row.duration+' Menit' }}
             </b-table-column>
 
-            <b-table-column field="date" label="Tanggal">
+            <b-table-column field="date" label="Tanggal" sortable>
               {{ props.row.date }}
             </b-table-column>
 
             <b-table-column field="time" label="Waktu">
               {{ props.row.time }}
+            </b-table-column>
+
+            <b-table-column field="alive" label="Status" sortable>
+              <span v-if="props.row.alive == 'Pending'" class="tag is-primary">{{ props.row.alive }}</span>
+              <span v-if="props.row.alive == 'Starting'" class="tag is-warning">{{ props.row.alive }}</span>
+              <span v-if="props.row.alive == 'Ended'" class="tag is-success">{{ props.row.alive }}</span>
             </b-table-column>
 
             <b-table-column label="Action">

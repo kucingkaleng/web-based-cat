@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavbarPlayer :items="navbar" />
     <div class="main-content">
       <slot />
     </div>
@@ -9,17 +8,13 @@
 </template>
 
 <script>
-import NavbarPlayer from '@/components/NavbarPlayer'
-
 export default {
   components: {
-    NavbarPlayer
+
   },
   data() {
     return {
-      navbar: [
-        { label: 'Home', icon: '', path: '/home'}
-      ]
+
     }
   },
 }

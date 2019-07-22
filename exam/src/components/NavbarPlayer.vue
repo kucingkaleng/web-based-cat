@@ -20,7 +20,8 @@
           {{ item.label }}
         </router-link>
       </div>
-      <div class="navbar-end">
+      <div class="navbar-end pr10 pl10">
+        <b-button type="is-danger" icon-right="power" @click="logout"></b-button>
       </div>
     </div>
   </nav>

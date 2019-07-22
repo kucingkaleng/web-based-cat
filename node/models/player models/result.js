@@ -28,12 +28,14 @@ const resultSchema = new mongoose.Schema({
     }
   ],
   answers: [answerSchema],
-  score: Number,
   score_each: Number,
   score_max: Number,
-  correct_count: Number,
   corrects: [],
   incorrects: [],
+  has_end: {
+    type: Boolean,
+    default: false
+  },
   created_at: {
     type: Date,
     default: Date.now()
@@ -45,13 +47,9 @@ resultSchema.pre('save', async function (next) {
   /**
    * inisialisasi awal (reset value ke default)
    */
-  this.score = 0
-  this.correct_count = 0
   this.corrects = []
   this.incorrects = []
-
   let isCorrect = false // penampung hasil pengecekan kebenaran jawaban
-
   /**
    * looping semua jawaban peserta yang kemudian akan dicek
    * setiap soal (answers.bank) apakah jawabannya benar atau salah
@@ -76,7 +74,6 @@ resultSchema.pre('save', async function (next) {
     // console.log(isCorrect);
     if (isCorrect) {
       this.corrects.push(v.bank) // mutated corrects id (soal mana saja yang benar)
-      this.correct_count++ // mutated correct counter
     }
     else {
       this.incorrects.push(v.bank) // mutated incorrects id (soal mana saja yang salah)
@@ -89,10 +86,10 @@ resultSchema.pre('save', async function (next) {
    * - score_max : score maksimal jika benar semua
    * - score : score peserta (score yang didapatkan)
    */
+
   let exam = await Exam.findById(this.exam).select('score -_id')
   this.score_each = exam.score
   this.score_max = exam.score * this.questions.length
-  this.score = exam.score * this.correct_count
   next()
 })
 

@@ -9,20 +9,6 @@ const { ObjectId } = mongoose.Types
 const Result = require('@/models/player models/result')
 const { getAnswers } = require('./get-answers')
 
-exports.createResult = async (req, res) => {
-  const result = await new Result({
-    user: req.user._id,
-    exam: req.params.examId,
-    answers: [
-      {
-        question_bank: req.params.bankId,
-        answer: req.params.choiceId
-      }
-    ]
-  })
-  await result.save()
-  res.json({ message: 'Result created.' })
-}
 
 exports.updateAnswer = async (req, res) => {
   /**
@@ -36,7 +22,12 @@ exports.updateAnswer = async (req, res) => {
   
   // jika terdapat data result di atas (true)
   if (result) {
-    result.answers.id(result.answers[0]._id).set(req.body)
+    let result_selected = await Result.findOne({
+      _id: req.params.resultId,
+      "answers.bank": req.body.bank
+    }).select('answers.$')
+
+    result.answers.id(result_selected.answers[0]._id).set(req.body)
     result.save()
   }
   else {
@@ -75,25 +66,84 @@ exports.getResultByUser = async (req, res) => {
   .populate('exam')
   .select('-questions -answers -corrects -incorrects')
   .lean()
+  .sort({ created_at: -1 })
   .exec((err, results) => {
     if (err) {
       res.status(400).json({ error: err })
     }
 
+    /**
+     * Proses mutasi tanggal, waktu, dan durasi
+     */
     results.forEach((val, index) => {
-      let now = moment().format('YYYY-MM-DD H:mm:ss')
-
+      // initialize current date (today)
+      let now = moment().format('YYYY-MM-DD HH:mm:ss')
+      /**
+       * mutasi:
+       * - format tanggal setiap ujian ke YYYY-MM-DD
+       * - penggabungan tanggal dan waktu ujian menjadi satu variabel
+       * datetime (YYYY-MM-DD H:mm:ss)
+       */
       val.exam.date = moment(val.exam.date).format('YYYY-MM-DD')
-      val.exam.datetime = moment(val.exam.date+' '+val.exam.time).format('YYYY-MM-DD H:mm:ss')
+      val.exam.start_at = moment(val.exam.date + ' ' + val.exam.time).format('YYYY-MM-DD HH:mm:ss')
+      val.exam.end_at = moment(val.exam.start_at).add(val.exam.duration, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 
-      if (now < val.exam.datetime) {
+      /**
+       * mutasi field atau key baru dengan nama alive yang menampung
+       * status waktu mulai ujian
+       */
+      if (now < val.exam.start_at) {
         val.exam.alive = 'Pending'
       }
-      else if (now >= val.exam.datetime) {
+      else if (now >= val.exam.start_at && now < val.exam.end_at) {
         val.exam.alive = 'Starting'
       }
+      else {
+        val.exam.alive = 'Ended'
+      }
     })
+
     res.json({results})
+  })
+}
+
+exports.getScore = async (req, res) => {
+  await Result.findOne({
+    user: req.params.userId,
+    exam: req.params.examId
+  })
+  .select('corrects score_each')
+  .lean()
+  .exec((err, result) => {
+    if (err) {
+      return res.status(400).json({ error: err })
+    }
+
+    if (!result) {
+      return res.status(400).json({ error: 'Not found.'})
+    }
+    
+    res.json({ result })
+  })
+}
+
+exports.getScores = async (req, res) => {
+  await Result.find({
+    exam: req.params.examId
+  })
+  .select('user corrects score_each')
+  .populate('user', 'nomor_induk data.nama')
+  .lean()
+  .exec((err, results) => {
+    if (err) {
+      return res.status(400).json({ error: err })
+    }
+
+    if (!results) {
+      return res.status(400).json({ error: 'Not found.'})
+    }
+    
+    res.json({ results })
   })
 }
 

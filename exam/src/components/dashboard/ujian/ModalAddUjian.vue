@@ -55,7 +55,7 @@ export default {
       form: {
         title: '',
         duration: new Date('1997-01-15 00:00:00'),
-        date: new Date('1997-01-15 00:00:00'),
+        date: new Date(),
         time: new Date('1997-01-15 00:00:00'),
         token: '',
         group: null
@@ -104,8 +104,8 @@ export default {
 
     getExam: async function () {
       await this.axios.get(`/exam/${this.examId}`)
-      .then(res => {
-        let exam = res.data.exam
+      .then( async res => {
+        let exam = await res.data.exam
         // mutations
         exam.date = new Date(exam.date)
         exam.time = new Date('1997-01-15 '+exam.time)

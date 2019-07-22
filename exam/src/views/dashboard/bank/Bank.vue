@@ -35,14 +35,14 @@
             </b-table-column>
 
             <b-table-column field="type" label="Type">
-              {{ (props.row.type) ? props.row.type : 'None' }}
+              {{ (props.row.type) ? props.row.type.type : 'None' }}
             </b-table-column>
 
             <b-table-column label="Action">
               <div class="buttons">
                 <b-button type="is-info" size="is-small" icon-right="arrow-right" title="Detail" tag="router-link" :to="`/ujian/${props.row._id}`" />
                 <b-button type="is-warning" size="is-small" icon-right="pencil" title="Edit" />
-                <b-button type="is-danger" size="is-small" icon-right="delete" title="Delete" />
+                <b-button type="is-danger" size="is-small" icon-right="delete" title="Delete" @click="confirmCustomDelete(props.row._id)" />
               </div>
             </b-table-column>
           </template>
@@ -100,6 +100,24 @@ export default {
       })
     },
 
+    deleteBank(id) {
+      this.axios.delete(`/bank/${id}`)
+      .then(() => {
+        this.getBanks()
+      })
+    },
+
+    confirmCustomDelete(id) {
+      this.$dialog.confirm({
+        title: 'Hapus soal',
+        message: 'Are you sure you want to <b>delete</b> this account? This action cannot be undone.',
+        confirmText: 'Hapus soal',
+        type: 'is-danger',
+        hasIcon: true,
+        onConfirm: () => this.deleteBank(id)
+      })
+    },
+
     showModalAdd() {
       this.isAddModalShow = true
     }
@@ -111,6 +129,9 @@ export default {
 
   mounted() {
     this.getBanks()
+    this.$root.$on('refresh', () => {
+      this.getBanks()
+    })
     this.$store.state.isGlobalLoading = false
   },
 }

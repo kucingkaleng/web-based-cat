@@ -7,5 +7,23 @@ export default [
       isPeserta: true
     },
     component: () => import('@/views/player/Home.vue')
+  },
+  {
+    path: '/play/:examId',
+    name: 'play',
+    meta: {
+      layout: "focus",
+      isPeserta: true
+    },
+    component: () => import('@/views/player/Player.vue')
+  },
+  {
+    path: '/score/:userId/:examId',
+    name: 'score',
+    meta: {
+      layout: "focus",
+      isPeserta: true
+    },
+    component: () => import('@/views/player/End.vue')
   }
 ]
