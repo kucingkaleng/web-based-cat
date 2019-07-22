@@ -13,7 +13,29 @@
         </div>
       </div>
 
-      <b-button size="is-small" type="is-primary">Tambah Pilihan</b-button>
+      <div class="columns">
+        <div class="column is-12">
+          <b-button icon-right="plus" size="is-small" type="is-primary">Tambah Pilihan</b-button>
+        </div>
+      </div>
+
+      <div v-for="(v, index) in form.choices" :key="index" class="columns">
+        <div class="column is-6">
+          <b-field>
+            <b-input v-model="v.answer">{{v.answer}}</b-input>
+          </b-field>
+        </div>
+        <div class="column is-3">
+          <b-field label="Benar">
+            <b-checkbox v-model="v.correct"></b-checkbox>
+          </b-field>
+        </div>
+        <div class="column is-3">
+          <b-field label="Benar">
+            <b-button icon-right="delete"></b-button>
+          </b-field>
+        </div>
+      </div>
 
       <div class="columns">
         <div class="column is-12">
@@ -72,6 +94,7 @@ export default {
     return {
       form: {
         uraian: '',
+        choices:[],
         type: null,
         level: null,
         competency: null,
@@ -104,6 +127,17 @@ export default {
       .then(res => {
         this.competencies = res.data.competencies
       })
+    },
+
+    newChoice: function () {
+      this.form.choices.push({
+        answer: '',
+        correct: false
+      })
+    },
+
+    removeChoice: function (index) {
+      this.form.choices.splice(index,1)
     },
 
     insertSoal: async function () {
