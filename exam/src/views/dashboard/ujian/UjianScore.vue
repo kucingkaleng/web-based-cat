@@ -10,7 +10,7 @@
           <ul>
             <li><router-link to="/home">Home</router-link></li>
             <li><router-link to="/ujian">Ujian</router-link></li>
-            <li><router-link :to="`/ujian/${exam._id}`">{{ exam.title }}</router-link></li></li>
+            <li><router-link :to="`/ujian/${exam._id}`">{{ exam.title }}</router-link></li>
             <li class="is-active"><a href="#">Scores</a></li>
           </ul>
         </nav>

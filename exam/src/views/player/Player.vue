@@ -129,6 +129,7 @@ export default {
       this.getQuestion(this.selectedPage,1)
     },
 
+    /** kondisi jika durasi habis atau end */
     durationEnd: async function () {
       await this.examEnded()
     },

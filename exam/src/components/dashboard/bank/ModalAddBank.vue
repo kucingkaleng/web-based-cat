@@ -15,13 +15,13 @@
 
       <div class="columns">
         <div class="column is-12">
-          <b-button icon-right="plus" size="is-small" type="is-primary">Tambah Pilihan</b-button>
+          <b-button icon-right="plus" size="is-small" type="is-primary" @click="newChoice()">Tambah Pilihan</b-button>
         </div>
       </div>
 
       <div v-for="(v, index) in form.choices" :key="index" class="columns">
         <div class="column is-6">
-          <b-field>
+          <b-field label="Jawaban">
             <b-input v-model="v.answer">{{v.answer}}</b-input>
           </b-field>
         </div>
@@ -32,7 +32,7 @@
         </div>
         <div class="column is-3">
           <b-field label="Benar">
-            <b-button icon-right="delete"></b-button>
+            <b-button icon-right="delete" type="is-danger" @click="removeChoice(index)"></b-button>
           </b-field>
         </div>
       </div>
@@ -93,7 +93,6 @@ export default {
   data() {
     return {
       form: {
-        uraian: '',
         choices:[],
         type: null,
         level: null,

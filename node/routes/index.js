@@ -1,4 +1,5 @@
 const routes = require('express').Router()
+const backup = require('mongodb-backup')
 
 // authentication
 const authRoute = require('./auth')
@@ -17,6 +18,13 @@ const bankRoute = require('./bank')
 routes.get('/', (req, res) => {
   res.status(200).json({
     message: 'Connected!'
+  })
+})
+
+routes.get('/backup/now', (req, res) => {
+  backup({
+    uri: 'mongodb://localhost:27017/exam',
+    root: __dirname+'/database'
   })
 })
 

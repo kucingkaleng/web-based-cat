@@ -27,5 +27,8 @@
   },
   "_moduleAliases": {
     "@": "."
+  },
+  "devDependencies": {
+    "mongodb-backup": "^1.6.9"
   }
 }

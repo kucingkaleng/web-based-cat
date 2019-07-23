@@ -54,31 +54,10 @@ resultSchema.pre('save', async function (next) {
    * looping semua jawaban peserta yang kemudian akan dicek
    * setiap soal (answers.bank) apakah jawabannya benar atau salah
    */
-  this.answers.forEach(async (v,index) => {
-    /**
-     * cek apakah jawaban berupa array (multiple answer)
-     */
-    if (v.chosen.constructor === Array) {
-      isCorrect = await this.correctionMultiple(v)
-    }
-    else {
-      // console.log('1 c');
-      isCorrect = await this.correction(v)
-    }
 
-    /**
-     * proses mutasi key corrects (id bank soal yang benar) dan
-     * correct_count (jumlah jawaban yang benar)
-     */
-    // console.log('done');
-    // console.log(isCorrect);
-    if (isCorrect) {
-      this.corrects.push(v.bank) // mutated corrects id (soal mana saja yang benar)
-    }
-    else {
-      this.incorrects.push(v.bank) // mutated incorrects id (soal mana saja yang salah)
-    }
-  })
+  const res = await mutationCorrection(this.answers)
+  this.corrects = res.cr
+  this.incorrects = res.incr
 
   /**
    * proses mutasi:
@@ -93,25 +72,56 @@ resultSchema.pre('save', async function (next) {
   next()
 })
 
+async function mutationCorrection (answers) {
+  let corrects = [],
+      incorrects = []
+
+  async function start () {
+    for (v of answers) {
+      /**
+       * cek apakah jawaban berupa array (multiple answer)
+       */
+      const bank = await Bank.findById(v.bank).select('correct_count correct_id -_id')
+
+      if (bank.correct_count > 1) {
+        isCorrect = _.isEqual(_.sortBy(bank.correct_id), _.sortBy(v.chosen))
+      } else {
+        isCorrect = bank.correct_id[0].toString() == v.chosen.toString()
+      }
+
+      /**
+       * proses mutasi key corrects (id bank soal yang benar) dan
+       * correct_count (jumlah jawaban yang benar)
+       */
+      if (isCorrect) {
+        corrects.push(v.bank) // mutated corrects id (soal mana saja yang benar)
+      } else {
+        incorrects.push(v.bank) // mutated incorrects id (soal mana saja yang salah)
+      }
+    }
+  }
+  await start()
+  return {
+    cr: corrects,
+    incr: incorrects
+  }
+}
+
+async function correction (v) {
+  const bank = await Bank.findById(v.bank).select('-_id')
+  return bank.correct_id[0].toString() == v.chosen.toString()
+}
+
+async function correctionMultiple (v) {
+  const bank = await Bank.findById(v.bank).select('-_id')
+
+  let true_count = bank.correct_id.length
+  return _.isEqual(_.sortBy(bank.correct_id), _.sortBy(v.chosen))
+}
+
 // methods
 resultSchema.methods = {
-  correction: async function (v) {
-    const bank = await Bank.findById(v.bank).select('-_id')
-    // console.log(bank.correct_id[0]);
-    // console.log(v.chosen);
-    // console.log(bank.correct_id[0].toString() == v.chosen.toString());
-    return bank.correct_id[0].toString() == v.chosen.toString()
-  },
-
-  correctionMultiple: async function (v) {
-    const bank = await Bank.findById(v.bank).select('-_id')
-
-    let true_count = bank.correct_id.length
-    // console.log(_.sortBy(bank.correct_id));
-    // console.log(_.sortBy(v.chosen));
-    // console.log(_.isEqual(_.sortBy(bank.correct_id), _.sortBy(v.chosen)));
-    return _.isEqual(_.sortBy(bank.correct_id), _.sortBy(v.chosen))
-  }
-},
+  
+}
 
 module.exports = mongoose.model('Result', resultSchema)

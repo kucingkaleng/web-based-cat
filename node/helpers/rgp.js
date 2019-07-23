@@ -24,6 +24,25 @@ exports.makeToken = function (length) {
   return result;
 }
 
+exports.getAlive = function (v) {
+  let now = moment().format('YYYY-MM-DD HH:mm:ss')
+  v.date = moment(v.date).format('YYYY-MM-DD')
+  v.start_at = moment(v.date + ' ' + v.time).format('YYYY-MM-DD HH:mm:ss')
+  v.end_at = moment(v.start_at).add(v.duration, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+
+  if (now < v.start_at) {
+    v.alive = 'Pending'
+  }
+  else if (now >= v.start_at && now < v.end_at) {
+    v.alive = 'Starting'
+  }
+  else {
+    v.alive = 'Ended'
+  }
+  
+  return v.alive
+}
+
 /**
  * mengubah array ke pagination format
  */

@@ -23,10 +23,11 @@
           :paginated="true"
           :per-page="5"
           bordered striped narrowed hoverable
+          detailed custom-detail-row detail-key="_id" show-detail-icon
         :loading="isLoading">
         
           <template slot-scope="props">
-            <b-table-column field="title"  label="Uraian" :title="props.row.uraian">
+            <b-table-column field="title"  label="Uraian" :title="props.row.title">
               {{ props.row.title }}
             </b-table-column>
 
@@ -45,6 +46,14 @@
                 <b-button type="is-danger" size="is-small" icon-right="delete" title="Delete" @click="confirmCustomDelete(props.row._id)" />
               </div>
             </b-table-column>
+          </template>
+
+          <template slot="detail" slot-scope="props">
+            <tr v-for="item in props.row.choices" :key="item._id">
+              <td></td>
+              <td>{{ item.answer }}</td>
+              <td class="has-text-centered">{{ item.correct == 1 ? 'Benar' : '' }}</td>
+            </tr>
           </template>
 
           <template slot="empty">
